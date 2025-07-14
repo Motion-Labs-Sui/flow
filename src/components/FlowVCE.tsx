@@ -92,39 +92,6 @@ const FloatingParticle = ({ delay = 0, size = 'small' }: { delay?: number, size?
   );
 };
 
-// Orbital Physics Elements
-const OrbitalElement = ({ radius = 100, duration = 20 }: { radius?: number, duration?: number }) => {
-  return (
-    <motion.div
-      className="absolute w-2 h-2 bg-motion-500/40 rounded-full"
-      style={{
-        left: '50%',
-        top: '50%',
-        marginLeft: '-4px',
-        marginTop: '-4px',
-      }}
-      animate={{
-        rotate: 360,
-      }}
-      transition={{
-        duration,
-        repeat: Infinity,
-        ease: "linear"
-      }}
-    >
-      <div 
-        className="w-1 h-1 bg-motion-400/60 rounded-full"
-        style={{
-          position: 'absolute',
-          left: `${radius}px`,
-          top: '50%',
-          transform: 'translateY(-50%)',
-        }}
-      />
-    </motion.div>
-  );
-};
-
 // Motion Labs Modern Background
 const MotionQuantumBackground = () => {
   return (
@@ -895,7 +862,7 @@ const GenerationInterface = ({ onGenerate, isGenerating }: {
                   Create Something Unique
                 </h3>
                 <p className="text-quantum-300 text-lg mb-6 leading-relaxed">
-                  Don't see what you're looking for? Describe your ideal website and let Claude's creativity shine with Motion Labs precision!
+                  Don&apos;t see what you&apos;re looking for? Describe your ideal website and let Claude&apos;s creativity shine with Motion Labs precision!
                 </p>
                 <div className="flex gap-4">
                   <motion.button
