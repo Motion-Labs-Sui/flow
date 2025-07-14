@@ -1,64 +1,72 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+import type { Config } from "tailwindcss";
+
+const config: Config = {
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
       colors: {
-        // Physics-inspired blue palette
-        quantum: {
-          50: '#e6f3ff',
-          100: '#b3d9ff',
-          200: '#80bfff',
-          300: '#4da6ff',
-          400: '#1a8cff',
-          500: '#0066cc',
-          600: '#004d99',
-          700: '#003366',
-          800: '#001a33',
-          900: '#000d1a',
+        // Motion Labs Modern Color System
+        motion: {
+          50: '#f0f7ff',
+          100: '#e0efff', 
+          200: '#bae0ff',
+          300: '#7cc8ff',
+          400: '#3bb0ff',
+          500: '#215FF6', // Main Motion Labs Blue
+          600: '#1e56dd',
+          700: '#1b4dc4',
+          800: '#1844ab',
+          900: '#153c92',
+          950: '#0f2a6b',
         },
-        plasma: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+        // Modern Neutral System
+        neutral: {
+          0: '#ffffff',
+          50: '#fafafa',
+          100: '#f5f5f5',
+          200: '#e5e5e5',
+          300: '#d4d4d4',
+          400: '#a3a3a3',
+          500: '#737373',
+          600: '#525252',
+          700: '#404040',
+          800: '#262626',
+          900: '#171717',
+          950: '#0a0a0a',
         },
-        void: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-        }
+        // Glass/Blur system
+        glass: {
+          light: 'rgba(255, 255, 255, 0.1)',
+          medium: 'rgba(255, 255, 255, 0.15)',
+          heavy: 'rgba(255, 255, 255, 0.2)',
+          dark: 'rgba(0, 0, 0, 0.1)',
+          'dark-medium': 'rgba(0, 0, 0, 0.2)',
+          'dark-heavy': 'rgba(0, 0, 0, 0.3)',
+        },
       },
       backgroundImage: {
-        'noise-subtle': `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E")`,
-        'wave-pattern': `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23334155' fill-opacity='0.03'%3E%3Cpath d='M30 30c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20m20 0c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        'quantum-grid': `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='20' height='20' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 20 0 L 0 0 0 20' fill='none' stroke='%23334155' stroke-width='0.5' opacity='0.1'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23grid)'/%3E%3C/svg%3E")`,
-      },
-      fontFamily: {
-        mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+        // Modern noise texture
+        'noise': `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E")`,
+        
+        // Subtle grid pattern
+        'grid-subtle': `
+          linear-gradient(rgba(33, 95, 246, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(33, 95, 246, 0.03) 1px, transparent 1px)
+        `,
+        
+        // Modern gradient backgrounds
+        'gradient-radial': 'radial-gradient(ellipse at center, var(--tw-gradient-stops))',
+        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
       animation: {
-        'float': 'float 3s ease-in-out infinite',
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'float': 'float 6s ease-in-out infinite',
         'glow': 'glow 2s ease-in-out infinite alternate',
-        'drift': 'drift 8s ease-in-out infinite',
+        'shine': 'shine 2s linear infinite',
       },
       keyframes: {
         float: {
@@ -66,20 +74,31 @@ module.exports = {
           '50%': { transform: 'translateY(-10px)' },
         },
         glow: {
-          '0%': { boxShadow: '0 0 5px #0ea5e9, 0 0 10px #0ea5e9, 0 0 15px #0ea5e9' },
-          '100%': { boxShadow: '0 0 10px #0ea5e9, 0 0 20px #0ea5e9, 0 0 30px #0ea5e9' },
+          '0%': { 
+            boxShadow: '0 0 20px rgba(33, 95, 246, 0.1)',
+          },
+          '100%': { 
+            boxShadow: '0 0 40px rgba(33, 95, 246, 0.3)',
+          },
         },
-        drift: {
-          '0%, 100%': { transform: 'translateX(0px) translateY(0px) rotate(0deg)' },
-          '25%': { transform: 'translateX(10px) translateY(-10px) rotate(1deg)' },
-          '50%': { transform: 'translateX(-5px) translateY(-20px) rotate(-1deg)' },
-          '75%': { transform: 'translateX(-10px) translateY(-10px) rotate(0.5deg)' },
+        shine: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
         },
       },
       backdropBlur: {
-        xs: '2px',
+        'xs': '2px',
+        'xl': '24px',
+        '2xl': '40px',
+        '3xl': '64px',
+      },
+      fontFamily: {
+        'mono': ['JetBrains Mono', 'SF Mono', 'Monaco', 'monospace'],
+        'sans': ['Inter', 'system-ui', 'sans-serif'],
       },
     },
   },
   plugins: [],
-}
+};
+
+export default config;
