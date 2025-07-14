@@ -1,26 +1,138 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --quantum-glow: #0ea5e9;
+  --plasma-glow: #38bdf8;
+  --void-deep: #0f172a;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-void-900 text-white;
+  background-attachment: fixed;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-void-800/30;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-void-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-void-500;
+}
+
+/* Glowing text effect */
+.glow-text {
+  text-shadow: 0 0 10px var(--quantum-glow), 0 0 20px var(--quantum-glow), 0 0 30px var(--quantum-glow);
+}
+
+/* Quantum border effect */
+.quantum-border {
+  position: relative;
+  background: linear-gradient(90deg, transparent, #0ea5e9, transparent);
+  background-size: 200% 1px;
+  background-repeat: no-repeat;
+  background-position: -100% 0;
+  animation: quantum-flow 3s infinite;
+}
+
+@keyframes quantum-flow {
+  0% { background-position: -100% 0; }
+  50% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* Glass morphism utility */
+.glass {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+/* Noise texture overlay */
+.noise-overlay {
+  position: relative;
+}
+
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Smooth focus transitions */
+input:focus,
+textarea:focus,
+select:focus {
+  transition: all 0.3s ease;
+}
+
+/* Custom animation for loading states */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 5px var(--quantum-glow);
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 20px var(--quantum-glow), 0 0 30px var(--quantum-glow);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Physics-inspired hover effects */
+.hover-float {
+  transition: transform 0.3s ease;
+}
+
+.hover-float:hover {
+  transform: translateY(-2px);
+}
+
+/* Quantum particle animation */
+@keyframes quantum-drift {
+  0%, 100% { 
+    transform: translate(0, 0) rotate(0deg); 
+    opacity: 0.3;
+  }
+  25% { 
+    transform: translate(30px, -30px) rotate(90deg); 
+    opacity: 0.8;
+  }
+  50% { 
+    transform: translate(-20px, -60px) rotate(180deg); 
+    opacity: 0.5;
+  }
+  75% { 
+    transform: translate(-40px, -20px) rotate(270deg); 
+    opacity: 0.7;
+  }
+}
+
+.quantum-particle {
+  animation: quantum-drift 12s ease-in-out infinite;
 }
