@@ -28,72 +28,30 @@ export interface WalrusDeployment {
 // Claude API integration
 export class ClaudeAPI {
   private apiKey: string;
-  private baseUrl = 'https://api.anthropic.com/v1';
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
   }
 
   async generateWebsite(prompt: string): Promise<GeneratedSite> {
-    const systemPrompt = `You are an expert web developer creating modern, responsive websites for Walrus Sites (decentralized hosting on Sui blockchain). 
-
-Generate a complete, production-ready website based on the user's prompt. The website should be:
-- Modern and visually stunning
-- Fully responsive (mobile, tablet, desktop)
-- Use modern CSS (flexbox, grid, animations)
-- Include interactive JavaScript features
-- Be optimized for performance
-- Use semantic HTML
-- Have proper meta tags and SEO
-
-Return the response in the following JSON format:
-{
-  "html": "complete HTML document",
-  "css": "complete CSS styles", 
-  "js": "complete JavaScript code",
-  "assets": {},
-  "metadata": {
-    "title": "site title",
-    "description": "site description",
-    "theme": "light/dark",
-    "responsive": true
-  }
-}
-
-Focus on creating magical, interactive experiences with smooth animations and modern design patterns.`;
-
-    const messages: ClaudeMessage[] = [
-      {
-        role: 'user',
-        content: `Create a website: ${prompt}`
-      }
-    ];
-
     try {
-      const response = await fetch(`${this.baseUrl}/messages`, {
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
-          'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20241022',
-          max_tokens: 8000,
-          system: systemPrompt,
-          messages
+          prompt,
+          apiKey: this.apiKey
         })
       });
 
       if (!response.ok) {
-        throw new Error(`Claude API error: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `API error: ${response.status}`);
       }
 
-      const data = await response.json();
-      const content = data.content[0].text;
-      
-      // Parse the JSON response from Claude
-      const siteData = JSON.parse(content);
+      const siteData = await response.json();
       return siteData;
     } catch (error) {
       console.error('Claude API Error:', error);
@@ -102,50 +60,26 @@ Focus on creating magical, interactive experiences with smooth animations and mo
   }
 
   async refineWebsite(currentSite: GeneratedSite, refinementPrompt: string): Promise<GeneratedSite> {
-    const systemPrompt = `You are refining an existing website. The user will provide the current website code and a refinement request. 
-
-Modify the website according to the user's request while maintaining the overall structure and ensuring it remains production-ready.
-
-Return the updated website in the same JSON format as before.`;
-
-    const messages: ClaudeMessage[] = [
-      {
-        role: 'user',
-        content: `Current website:
-HTML: ${currentSite.html}
-CSS: ${currentSite.css}
-JS: ${currentSite.js}
-
-Refinement request: ${refinementPrompt}
-
-Please update the website according to this request.`
-      }
-    ];
-
     try {
-      const response = await fetch(`${this.baseUrl}/messages`, {
+      const response = await fetch('/api/refine', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
-          'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20241022',
-          max_tokens: 8000,
-          system: systemPrompt,
-          messages
+          currentSite,
+          refinementPrompt,
+          apiKey: this.apiKey
         })
       });
 
       if (!response.ok) {
-        throw new Error(`Claude API error: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `API error: ${response.status}`);
       }
 
-      const data = await response.json();
-      const content = data.content[0].text;
-      
-      return JSON.parse(content);
+      const siteData = await response.json();
+      return siteData;
     } catch (error) {
       console.error('Claude API Error:', error);
       throw new Error('Failed to refine website with Claude AI');

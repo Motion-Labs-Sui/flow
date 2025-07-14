@@ -19,7 +19,22 @@ import {
   Brain,
   Cpu,
   CloudUpload,
-  Waves
+  Waves,
+  ArrowLeft,
+  ExternalLink,
+  Code,
+  Play,
+  Trash2,
+  Edit3,
+  Share2,
+  Download,
+  Globe,
+  Zap,
+  Monitor,
+  Tablet,
+  Smartphone,
+  Send,
+  MessageSquare
 } from 'lucide-react';
 import PreviewPanel from './PreviewPanel';
 import { ClaudeAPI, WalrusAPI, type GeneratedSite, type WalrusDeployment, generateSiteName, validateClaudeAPIKey, validatePrivateKey } from '../lib/api';
@@ -34,6 +49,7 @@ interface Project {
   lastModified: Date;
   thumbnail?: string;
   status: 'draft' | 'published' | 'deploying';
+  generatedSite?: GeneratedSite;
 }
 
 interface GenerationHistory {
@@ -65,7 +81,6 @@ const FloatingParticle = ({ delay = 0, size = 'small' }: { delay?: number, size?
   };
 
   useEffect(() => {
-    // Set random position only on client side to avoid hydration mismatch
     setPosition({
       left: `${Math.random() * 100}%`,
       top: `${Math.random() * 100}%`,
@@ -96,30 +111,14 @@ const FloatingParticle = ({ delay = 0, size = 'small' }: { delay?: number, size?
 const MotionQuantumBackground = () => {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none">
-      {/* Base gradient with motion blue */}
       <div className="absolute inset-0 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950" />
-      
-      {/* Subtle grid */}
-      <div className="absolute inset-0 bg-grid-subtle opacity-40" style={{ backgroundSize: '32px 32px' }} />
-      
-      {/* Modern noise texture */}
-      <div className="absolute inset-0 bg-noise" />
-      
-      {/* Floating particles */}
-      {[...Array(8)].map((_, i) => (
-        <FloatingParticle 
-          key={i} 
-          delay={i * 0.8} 
-          size={(['small', 'medium'] as const)[i % 2]}
-        />
-      ))}
-      
-      {/* Ambient glow */}
       <motion.div 
-        className="absolute top-1/4 left-1/4 w-96 h-96 bg-motion-500/5 rounded-full blur-3xl"
+        className="absolute inset-0 opacity-30"
+        style={{
+          background: 'radial-gradient(circle at 20% 80%, rgba(33, 95, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(33, 95, 246, 0.05) 0%, transparent 50%)',
+        }}
         animate={{ 
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.6, 0.3] 
+          opacity: [0.2, 0.4, 0.2] 
         }}
         transition={{ 
           duration: 8, 
@@ -127,19 +126,13 @@ const MotionQuantumBackground = () => {
           ease: "easeInOut" 
         }}
       />
-      <motion.div 
-        className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-motion-500/3 rounded-full blur-3xl"
-        animate={{ 
-          scale: [1.2, 1, 1.2],
-          opacity: [0.2, 0.4, 0.2] 
-        }}
-        transition={{ 
-          duration: 10, 
-          repeat: Infinity, 
-          ease: "easeInOut",
-          delay: 2
-        }}
-      />
+      {[...Array(4)].map((_, i) => (
+        <FloatingParticle 
+          key={i} 
+          delay={i * 1.5} 
+          size="small"
+        />
+      ))}
     </div>
   );
 };
@@ -162,28 +155,27 @@ const SettingsModal = ({ isOpen, onClose, settings, onSave }: {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/80 backdrop-blur-xl"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xl"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
       <motion.div
-        className="w-full max-w-2xl bg-glass-dark-heavy backdrop-blur-2xl rounded-3xl border border-neutral-800/50 shadow-2xl"
+        className="w-full max-w-2xl bg-neutral-900/95 backdrop-blur-2xl rounded-3xl border border-neutral-700/50 shadow-2xl"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
       >
-        <div className="p-8 border-b border-neutral-800/50">
-          <h2 className="text-3xl font-bold text-neutral-0 flex items-center gap-3">
+        <div className="p-8 border-b border-neutral-700/50">
+          <h2 className="text-3xl font-bold text-white flex items-center gap-3">
             <Settings className="w-8 h-8 text-motion-500" />
             Settings
           </h2>
         </div>
         
         <div className="p-8 space-y-8 max-h-96 overflow-y-auto">
-          {/* API Keys */}
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-neutral-0 flex items-center gap-3">
+            <h3 className="text-xl font-semibold text-white flex items-center gap-3">
               <Key className="w-6 h-6 text-motion-400" />
               API Configuration
             </h3>
@@ -198,15 +190,14 @@ const SettingsModal = ({ isOpen, onClose, settings, onSave }: {
                   ...localSettings,
                   claudeApiKey: e.target.value
                 })}
-                className="w-full p-4 rounded-2xl bg-glass-dark backdrop-blur-xl border border-neutral-700/50 text-neutral-0 placeholder-neutral-400 focus:border-motion-500/50 focus:outline-none transition-all"
+                className="w-full p-4 rounded-2xl bg-neutral-800/60 backdrop-blur-xl border border-neutral-600/50 text-white placeholder-neutral-400 focus:border-motion-500/50 focus:outline-none transition-all"
                 placeholder="sk-ant-api03-..."
               />
             </div>
           </div>
 
-          {/* Walrus Configuration */}
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-neutral-0 flex items-center gap-3">
+            <h3 className="text-xl font-semibold text-white flex items-center gap-3">
               <Wallet className="w-6 h-6 text-motion-400" />
               Walrus Configuration
             </h3>
@@ -224,7 +215,7 @@ const SettingsModal = ({ isOpen, onClose, settings, onSave }: {
                     privateKey: e.target.value
                   }
                 })}
-                className="w-full p-4 rounded-2xl bg-glass-dark backdrop-blur-xl border border-neutral-700/50 text-neutral-0 placeholder-neutral-400 focus:border-motion-500/50 focus:outline-none transition-all"
+                className="w-full p-4 rounded-2xl bg-neutral-800/60 backdrop-blur-xl border border-neutral-600/50 text-white placeholder-neutral-400 focus:border-motion-500/50 focus:outline-none transition-all"
                 placeholder="Your Sui private key"
               />
             </div>
@@ -241,7 +232,7 @@ const SettingsModal = ({ isOpen, onClose, settings, onSave }: {
                     network: e.target.value as 'mainnet' | 'testnet'
                   }
                 })}
-                className="w-full p-4 rounded-2xl bg-glass-dark backdrop-blur-xl border border-neutral-700/50 text-neutral-0 focus:border-motion-500/50 focus:outline-none transition-all"
+                className="w-full p-4 rounded-2xl bg-neutral-800/60 backdrop-blur-xl border border-neutral-600/50 text-white focus:border-motion-500/50 focus:outline-none transition-all"
               >
                 <option value="testnet">Testnet</option>
                 <option value="mainnet">Mainnet</option>
@@ -249,9 +240,8 @@ const SettingsModal = ({ isOpen, onClose, settings, onSave }: {
             </div>
           </div>
 
-          {/* UI Preferences */}
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-neutral-0 flex items-center gap-3">
+            <h3 className="text-xl font-semibold text-white flex items-center gap-3">
               <Palette className="w-6 h-6 text-motion-400" />
               Preferences
             </h3>
@@ -263,10 +253,10 @@ const SettingsModal = ({ isOpen, onClose, settings, onSave }: {
                   autoSave: !localSettings.autoSave
                 })}
                 className={`w-14 h-7 rounded-full transition-all ${
-                  localSettings.autoSave ? 'bg-motion-500' : 'bg-neutral-700'
+                  localSettings.autoSave ? 'bg-motion-500' : 'bg-neutral-600'
                 }`}
               >
-                <div className={`w-5 h-5 bg-neutral-0 rounded-full transition-transform ${
+                <div className={`w-5 h-5 bg-white rounded-full transition-transform ${
                   localSettings.autoSave ? 'translate-x-7' : 'translate-x-1'
                 }`} />
               </button>
@@ -274,16 +264,16 @@ const SettingsModal = ({ isOpen, onClose, settings, onSave }: {
           </div>
         </div>
 
-        <div className="p-8 border-t border-neutral-800/50 flex gap-4">
+        <div className="p-8 border-t border-neutral-700/50 flex gap-4">
           <button
             onClick={onClose}
-            className="flex-1 px-6 py-3 rounded-2xl bg-glass-dark backdrop-blur-xl border border-neutral-700/50 text-neutral-300 hover:bg-glass-dark-medium hover:text-neutral-0 transition-all"
+            className="flex-1 px-6 py-3 rounded-2xl bg-neutral-800/60 border border-neutral-600/50 text-neutral-300 hover:bg-neutral-700/60 hover:text-white transition-all"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 px-6 py-3 rounded-2xl bg-motion-500 text-neutral-0 hover:bg-motion-400 transition-all shadow-lg shadow-motion-500/20"
+            className="flex-1 px-6 py-3 rounded-2xl bg-motion-500 text-white hover:bg-motion-400 transition-all shadow-lg shadow-motion-500/20"
           >
             Save Settings
           </button>
@@ -296,31 +286,34 @@ const SettingsModal = ({ isOpen, onClose, settings, onSave }: {
 // Project Card Component
 const ProjectCard = ({ project, onClick }: { project: Project; onClick: () => void }) => {
   const statusColors = {
-    draft: 'bg-void-600 text-void-300',
-    published: 'bg-quantum-500 text-white',
-    deploying: 'bg-plasma-500 text-white'
+    draft: 'bg-neutral-700/50 text-neutral-300 border-neutral-600/50',
+    published: 'bg-green-500/20 text-green-300 border-green-500/30',
+    deploying: 'bg-orange-500/20 text-orange-300 border-orange-500/30'
   };
 
   return (
     <motion.div
-      className="bg-void-800/50 rounded-xl border border-void-700/50 p-4 hover:bg-void-700/50 hover:border-quantum-500/50 transition-all cursor-pointer group"
-      whileHover={{ scale: 1.02 }}
+      className="bg-neutral-900/60 backdrop-blur-sm rounded-2xl border border-neutral-700/50 p-6 hover:bg-neutral-800/60 hover:border-motion-500/50 transition-all cursor-pointer group"
+      whileHover={{ scale: 1.02, y: -4 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
     >
-      <div className="flex items-start justify-between mb-3">
-        <h3 className="font-semibold text-white group-hover:text-quantum-300 transition-colors">
+      <div className="flex items-start justify-between mb-4">
+        <h3 className="font-bold text-white group-hover:text-motion-300 transition-colors text-lg line-clamp-1">
           {project.name}
         </h3>
-        <span className={`px-2 py-1 rounded-full text-xs ${statusColors[project.status]}`}>
+        <span className={`px-3 py-1 rounded-full text-xs border ${statusColors[project.status]} font-medium`}>
           {project.status}
         </span>
       </div>
-      <p className="text-void-300 text-sm mb-3 line-clamp-2">{project.description}</p>
-      <div className="flex items-center justify-between text-xs text-void-400">
+      <p className="text-neutral-400 text-sm mb-4 line-clamp-2">{project.description}</p>
+      <div className="flex items-center justify-between text-xs text-neutral-500">
         <span>{project.lastModified.toLocaleDateString()}</span>
         {project.suinsName && (
-          <span className="text-quantum-400">{project.suinsName}.wal.app</span>
+          <div className="flex items-center gap-2 text-motion-400 font-medium">
+            <Globe className="w-3 h-3" />
+            <span>{project.suinsName}.wal.app</span>
+          </div>
         )}
       </div>
     </motion.div>
@@ -328,52 +321,54 @@ const ProjectCard = ({ project, onClick }: { project: Project; onClick: () => vo
 };
 
 // Header component
-const Header = ({ onSettingsClick, currentView }: { 
+const Header = ({ onSettingsClick, currentView, currentProject, onBackToProjects }: { 
   onSettingsClick: () => void;
   currentView: string;
+  currentProject?: Project | null;
+  onBackToProjects?: () => void;
 }) => {
   return (
     <motion.header 
-      className="relative z-10 flex items-center justify-between p-6 border-b border-neutral-800/30 bg-glass-dark-medium backdrop-blur-2xl"
+      className="relative z-20 flex items-center justify-between p-6 border-b border-neutral-700/50 bg-neutral-950/95 backdrop-blur-xl"
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
       <div className="flex items-center space-x-4">
+        {currentProject && onBackToProjects && (
+          <motion.button
+            onClick={onBackToProjects}
+            className="p-2 rounded-xl bg-neutral-800/50 border border-neutral-600/50 hover:bg-neutral-700/50 hover:border-motion-500/50 transition-all"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <ArrowLeft className="w-5 h-5 text-neutral-300" />
+          </motion.button>
+        )}
         <motion.div 
-          className="relative p-3 rounded-2xl bg-motion-500 shadow-xl shadow-motion-500/20"
-          whileHover={{ scale: 1.05, rotate: 5 }}
+          className="relative p-3 rounded-xl bg-motion-500 shadow-lg shadow-motion-500/25"
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          transition={{ duration: 0.3 }}
         >
-          <Atom className="w-7 h-7 text-neutral-0" />
-          <motion.div
-            className="absolute inset-0 rounded-2xl bg-motion-400/30"
-            animate={{ 
-              opacity: [0, 0.5, 0],
-              scale: [1, 1.2, 1]
-            }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
+          <Atom className="w-7 h-7 text-white" />
         </motion.div>
         <div>
-          <h1 className="text-2xl font-bold text-neutral-0">Flow</h1>
-          <p className="text-sm text-neutral-400">AI-Powered Walrus Sites Generator</p>
+          <h1 className="text-2xl font-bold text-white">
+            {currentProject ? currentProject.name : 'Flow VCE'}
+          </h1>
+          <p className="text-sm text-neutral-400">
+            {currentProject ? 'AI-Powered Project Management' : 'AI-Powered Walrus Sites'}
+          </p>
         </div>
       </div>
       
       <div className="flex items-center space-x-4">
-        <motion.div 
-          className="px-4 py-2 rounded-xl bg-glass-light backdrop-blur-xl border border-neutral-700/30"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-        >
+        <div className="px-4 py-2 rounded-xl bg-neutral-800/50 border border-neutral-600/50">
           <span className="text-sm text-neutral-300 uppercase tracking-wide font-medium">{currentView}</span>
-        </motion.div>
+        </div>
         <motion.button 
-          className="p-3 rounded-xl bg-glass-dark backdrop-blur-xl border border-neutral-700/30 hover:bg-glass-dark-medium hover:border-motion-500/30 transition-all"
-          whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(33, 95, 246, 0.1)' }}
+          className="p-3 rounded-xl bg-neutral-800/50 border border-neutral-600/50 hover:bg-neutral-700/50 hover:border-motion-500/50 transition-all"
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onSettingsClick}
         >
@@ -384,23 +379,30 @@ const Header = ({ onSettingsClick, currentView }: {
   );
 };
 
-// Sidebar component
-const Sidebar = ({ activeTab, setActiveTab }: {
+// Enhanced Sidebar component
+const Sidebar = ({ activeTab, setActiveTab, isProjectView = false }: {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  isProjectView?: boolean;
 }) => {
-  const tabs = [
+  const mainTabs = [
     { id: 'projects', icon: FolderPlus, label: 'Projects' },
+    { id: 'generate', icon: Wand2, label: 'Generate' },
+    { id: 'history', icon: History, label: 'History' },
+  ];
+
+  const projectTabs = [
     { id: 'generate', icon: Wand2, label: 'Generate' },
     { id: 'code', icon: FileCode, label: 'Code' },
     { id: 'preview', icon: Eye, label: 'Preview' },
     { id: 'deploy', icon: CloudUpload, label: 'Deploy' },
-    { id: 'history', icon: History, label: 'History' },
   ];
+
+  const tabs = isProjectView ? projectTabs : mainTabs;
 
   return (
     <motion.div 
-      className="w-20 bg-glass-dark-medium backdrop-blur-2xl border-r border-neutral-800/30 flex flex-col items-center py-8 space-y-6"
+      className="w-20 bg-neutral-950/95 backdrop-blur-xl border-r border-neutral-700/50 flex flex-col items-center py-8 space-y-6"
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.8, delay: 0.2 }}
@@ -411,11 +413,11 @@ const Sidebar = ({ activeTab, setActiveTab }: {
           onClick={() => setActiveTab(tab.id)}
           className={`relative p-4 rounded-2xl transition-all group ${
             activeTab === tab.id 
-              ? 'bg-motion-500 text-neutral-0 shadow-xl shadow-motion-500/30' 
-              : 'bg-glass-dark text-neutral-400 hover:bg-glass-dark-medium hover:text-neutral-200'
+              ? 'bg-motion-500 text-white shadow-lg shadow-motion-500/25' 
+              : 'bg-neutral-800/30 text-neutral-400 hover:bg-neutral-700/50 hover:text-white'
           }`}
-          whileHover={{ scale: 1.1, y: -2 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.05, y: -2 }}
+          whileTap={{ scale: 0.95 }}
           title={tab.label}
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -423,7 +425,6 @@ const Sidebar = ({ activeTab, setActiveTab }: {
         >
           <tab.icon className="w-6 h-6" />
           
-          {/* Active indicator */}
           {activeTab === tab.id && (
             <motion.div
               className="absolute inset-0 rounded-2xl bg-motion-400/20"
@@ -432,11 +433,10 @@ const Sidebar = ({ activeTab, setActiveTab }: {
             />
           )}
           
-          {/* Hover glow */}
-          <motion.div
-            className="absolute inset-0 rounded-2xl bg-motion-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
-            initial={false}
-          />
+          {/* Tooltip */}
+          <div className="absolute left-full ml-4 px-3 py-2 bg-neutral-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+            {tab.label}
+          </div>
         </motion.button>
       ))}
     </motion.div>
@@ -450,75 +450,77 @@ const ProjectsView = ({ projects, onProjectSelect, onNewProject }: {
   onNewProject: () => void;
 }) => {
   return (
-    <div className="flex-1 p-6 overflow-y-auto">
-      <motion.div 
-        className="max-w-6xl mx-auto"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-white mb-2">Your Projects</h2>
-            <p className="text-void-300">Create and manage your Walrus Sites</p>
-          </div>
-          <motion.button
-            onClick={onNewProject}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-quantum-500 text-white hover:bg-quantum-400 transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Plus className="w-5 h-5" />
-            New Project
-          </motion.button>
-        </div>
-
-        {projects.length === 0 ? (
-          <motion.div 
-            className="text-center py-20"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-quantum-500 to-plasma-500 flex items-center justify-center">
-              <FolderPlus className="w-10 h-10 text-white" />
+    <div className="flex-1 overflow-y-auto">
+      <div className="p-8">
+        <motion.div 
+          className="max-w-7xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-4xl font-bold text-white mb-2">Your Projects</h2>
+              <p className="text-neutral-400 text-lg">Create and manage your Walrus Sites with AI precision</p>
             </div>
-            <h3 className="text-xl font-bold text-white mb-3">No projects yet</h3>
-            <p className="text-void-300 mb-6">Create your first AI-powered Walrus Site</p>
             <motion.button
               onClick={onNewProject}
-              className="px-6 py-3 rounded-lg bg-quantum-500 text-white hover:bg-quantum-400 transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-motion-500 text-white hover:bg-motion-400 transition-colors shadow-lg shadow-motion-500/25"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              Start Building
+              <Plus className="w-5 h-5" />
+              <span className="font-medium">New Project</span>
             </motion.button>
-          </motion.div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onClick={() => onProjectSelect(project)}
-              />
-            ))}
           </div>
-        )}
-      </motion.div>
+
+          {projects.length === 0 ? (
+            <motion.div 
+              className="text-center py-20"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <div className="w-24 h-24 mx-auto mb-8 rounded-3xl bg-motion-500/20 border border-motion-500/30 flex items-center justify-center">
+                <FolderPlus className="w-12 h-12 text-motion-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">No projects yet</h3>
+              <p className="text-neutral-400 mb-8 max-w-md mx-auto text-lg">Create your first AI-powered Walrus Site and deploy it to the decentralized web</p>
+              <motion.button
+                onClick={onNewProject}
+                className="px-8 py-4 rounded-2xl bg-motion-500 text-white hover:bg-motion-400 transition-colors shadow-lg shadow-motion-500/25 font-medium"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Start Building
+              </motion.button>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {projects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onClick={() => onProjectSelect(project)}
+                />
+              ))}
+            </div>
+          )}
+        </motion.div>
+      </div>
     </div>
   );
 };
 
-// Generation Interface
-const GenerationInterface = ({ onGenerate, isGenerating }: {
+// New Claude-style Generation Interface
+const GenerationInterface = ({ onGenerate, isGenerating, currentProject }: {
   onGenerate: (prompt: string) => void;
   isGenerating: boolean;
+  currentProject?: Project | null;
 }) => {
   const [prompt, setPrompt] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [favoritePrompts, setFavoritePrompts] = useState<string[]>([]);
 
   const promptCategories = {
     all: 'All Templates',
@@ -567,412 +569,273 @@ const GenerationInterface = ({ onGenerate, isGenerating }: {
       description: 'Game assets and tokenomics visualization',
       prompt: "Create a GameFi landing page with animated game assets, tokenomics visualization charts, play-to-earn mechanics explanation, leaderboards, and reward claiming interface."
     },
-    {
-      category: 'defi',
-      title: 'Yield Farming Platform',
-      description: 'Pool management and rewards tracking',
-      prompt: "Build a yield farming platform with pool cards showing APY, stake/unstake modals, rewards tracking, harvest buttons, and animated liquidity charts with glassmorphism effects."
-    },
-    {
-      category: 'nft',
-      title: 'NFT Marketplace',
-      description: 'Trading platform with advanced filters',
-      prompt: "Design an NFT marketplace with advanced filtering, price charts, bidding interface, collection analytics, trending sections, and smooth hover animations on NFT cards."
-    },
-    {
-      category: 'portfolio',
-      title: 'Creative Agency Portfolio',
-      description: 'Interactive showcase with case studies',
-      prompt: "Create a creative agency portfolio with hero video background, interactive case study cards, team member profiles, service offerings, and smooth parallax scrolling effects."
-    },
-    {
-      category: 'landing',
-      title: 'SaaS Product Landing',
-      description: 'Feature showcase and pricing tiers',
-      prompt: "Build a SaaS product landing page with animated feature cards, pricing tier comparison, customer testimonials carousel, integration logos, and conversion-focused CTA buttons."
-    },
-    {
-      category: 'dashboard',
-      title: 'Trading Analytics Dashboard',
-      description: 'Real-time charts and portfolio tracking',
-      prompt: "Generate a trading analytics dashboard with real-time price charts, portfolio balance cards, trade history table, P&L indicators, and responsive mobile layout."
-    },
-    {
-      category: 'docs',
-      title: 'API Documentation Hub',
-      description: 'Interactive API explorer with examples',
-      prompt: "Create an API documentation hub with interactive endpoint explorer, request/response examples, authentication guides, SDK downloads, and real-time API status indicators."
-    }
   ];
 
-  const filteredPrompts = examplePrompts.filter(prompt => {
-    const matchesCategory = selectedCategory === 'all' || prompt.category === selectedCategory;
+  const filteredPrompts = examplePrompts.filter(template => {
+    const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
     const matchesSearch = searchQuery === '' || 
-      prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      prompt.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      prompt.prompt.toLowerCase().includes(searchQuery.toLowerCase());
+      template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      template.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
-  const toggleFavorite = (promptText: string) => {
-    setFavoritePrompts(prev => 
-      prev.includes(promptText) 
-        ? prev.filter(p => p !== promptText)
-        : [...prev, promptText]
-    );
-  };
-
   const handleSubmit = () => {
-    if (!prompt.trim()) return;
+    if (!prompt.trim() || isGenerating) return;
     onGenerate(prompt);
   };
 
   return (
-    <div className="flex-1 relative overflow-y-auto">
-      {/* Quantum Background */}
-      <MotionQuantumBackground />
-      
-      {/* Scrollable Content */}
-      <div className="relative z-10 min-h-full">
-        <div className="p-6 space-y-12 pb-6">
-          <motion.div 
-            className="max-w-6xl mx-auto space-y-12"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            {/* Hero Section */}
-            <div className="text-center py-12">
-              <motion.div
-                className="relative w-24 h-24 mx-auto mb-8"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              >
-                <motion.div
-                  className="w-full h-full rounded-3xl bg-gradient-to-br from-motion-500 to-motion-700 flex items-center justify-center shadow-2xl"
-                  animate={{ 
-                    boxShadow: [
-                      '0 0 30px rgba(33, 95, 246, 0.4)',
-                      '0 0 60px rgba(33, 95, 246, 0.6)',
-                      '0 0 30px rgba(33, 95, 246, 0.4)'
-                    ]
-                  }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                >
-                  <Brain className="w-12 h-12 text-white" />
-                </motion.div>
-                
-                {/* Orbital rings */}
-                <motion.div
-                  className="absolute inset-0 border-2 border-motion-300/30 rounded-full"
-                  style={{ width: '120%', height: '120%', left: '-10%', top: '-10%' }}
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                />
-                <motion.div
-                  className="absolute inset-0 border border-motion-400/20 rounded-full"
-                  style={{ width: '140%', height: '140%', left: '-20%', top: '-20%' }}
-                  animate={{ rotate: -360 }}
-                  transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                />
-              </motion.div>
-              
-              <motion.h2 
-                className="text-5xl font-bold text-white mb-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                AI Website Generator
-              </motion.h2>
-              <motion.p 
-                className="text-quantum-300 text-xl max-w-3xl mx-auto leading-relaxed"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-              >
-                Describe your vision and watch Claude AI create stunning Walrus Sites with Motion Labs precision
-              </motion.p>
-            </div>
-
-            {/* Search and Filters */}
-            <motion.div 
-              className="flex flex-col lg:flex-row gap-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-            >
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search templates..."
-                  className="w-full pl-12 pr-6 py-4 rounded-2xl bg-void-800/60 backdrop-blur-xl border border-motion-500/20 text-white placeholder-quantum-400 focus:outline-none focus:border-motion-500/60 focus:bg-void-800/80 transition-all text-lg shadow-xl"
-                />
-                <Sparkles className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-motion-400" />
-                <motion.div
-                  className="absolute inset-0 rounded-2xl bg-motion-500/5 opacity-0 pointer-events-none"
-                  whileHover={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                />
-              </div>
-              
-              <div className="flex gap-3 overflow-x-auto pb-2">
-                {Object.entries(promptCategories).map(([key, label]) => (
-                  <motion.button
-                    key={key}
-                    onClick={() => setSelectedCategory(key)}
-                    className={`px-6 py-4 rounded-2xl whitespace-nowrap font-medium transition-all shadow-lg ${
-                      selectedCategory === key
-                        ? 'bg-motion-500 text-white shadow-motion-500/30'
-                        : 'bg-void-800/60 text-quantum-300 hover:bg-void-700/60 hover:text-white backdrop-blur-xl'
-                    }`}
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {label}
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Template Grid */}
-            <motion.div 
-              className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1, staggerChildren: 0.1 }}
-            >
-              {filteredPrompts.map((template, index) => (
-                <motion.div
-                  key={index}
-                  className="group relative p-8 rounded-3xl bg-void-800/40 backdrop-blur-xl border border-motion-500/20 hover:border-motion-400/50 transition-all cursor-pointer overflow-hidden"
-                  whileHover={{ scale: 1.02, y: -8 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setPrompt(template.prompt)}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.2 + index * 0.1 }}
-                >
-                  {/* Animated background gradient */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-motion-500/10 via-transparent to-motion-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    initial={false}
-                  />
-                  
-                  {/* Category Badge */}
-                  <div className="flex items-center justify-between mb-6 relative z-10">
-                    <span className="px-4 py-2 rounded-full text-sm bg-motion-500/20 text-motion-300 border border-motion-500/30 backdrop-blur-sm font-medium">
-                      {promptCategories[template.category as keyof typeof promptCategories]}
-                    </span>
-                    <motion.button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleFavorite(template.prompt);
-                      }}
-                      className={`p-3 rounded-full transition-all ${
-                        favoritePrompts.includes(template.prompt)
-                          ? 'text-plasma-400 bg-plasma-500/20 shadow-lg shadow-plasma-500/20'
-                          : 'text-quantum-400 hover:text-plasma-400 hover:bg-plasma-500/10'
-                      }`}
-                      whileHover={{ scale: 1.1, rotate: 15 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <Sparkles className="w-5 h-5" />
-                    </motion.button>
-                  </div>
-
-                  {/* Content */}
-                  <div className="relative z-10">
-                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-motion-300 transition-colors">
-                      {template.title}
-                    </h3>
-                    <p className="text-quantum-300 text-sm mb-6 leading-relaxed">
-                      {template.description}
-                    </p>
-                    
-                    {/* Preview */}
-                    <div className="text-xs text-quantum-500 line-clamp-3 font-mono bg-void-900/60 p-4 rounded-xl border border-void-700/50 backdrop-blur-sm">
-                      {template.prompt}
-                    </div>
-                  </div>
-
-                  {/* Floating elements */}
-                  <motion.div
-                    className="absolute top-4 right-4 w-2 h-2 bg-motion-400/40 rounded-full"
-                    animate={{ 
-                      scale: [1, 1.5, 1],
-                      opacity: [0.4, 0.8, 0.4] 
-                    }}
-                    transition={{ 
-                      duration: 3, 
-                      repeat: Infinity,
-                      delay: index * 0.5 
-                    }}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
-
-            {/* No Results */}
-            {filteredPrompts.length === 0 && (
-              <motion.div 
-                className="text-center py-20"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.5 }}
-              >
-                <div className="w-24 h-24 mx-auto mb-8 rounded-3xl bg-void-800/60 backdrop-blur-xl flex items-center justify-center">
-                  <Sparkles className="w-12 h-12 text-quantum-400" />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-4">No templates found</h3>
-                <p className="text-quantum-300 text-lg">Try adjusting your search or category filter</p>
-              </motion.div>
-            )}
-
-            {/* Custom Prompt Section */}
+    <div className="flex-1 overflow-y-auto">
+      <div className="max-w-4xl mx-auto p-8">
+        {/* Main Prompt Interface - Like Claude */}
+        <motion.div 
+          className="mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          {/* Header */}
+          <div className="text-center mb-8">
             <motion.div
-              className="relative p-8 rounded-3xl bg-gradient-to-br from-motion-500/10 via-motion-600/5 to-transparent border border-motion-500/30 backdrop-blur-xl overflow-hidden"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.8 }}
+              className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-motion-500 flex items-center justify-center shadow-lg shadow-motion-500/25"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
             >
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-motion-500/5 to-motion-600/5"
-                animate={{ 
-                  background: [
-                    'linear-gradient(45deg, rgba(33, 95, 246, 0.05), rgba(33, 95, 246, 0.02))',
-                    'linear-gradient(225deg, rgba(33, 95, 246, 0.08), rgba(33, 95, 246, 0.03))',
-                    'linear-gradient(45deg, rgba(33, 95, 246, 0.05), rgba(33, 95, 246, 0.02))'
-                  ]
+              <Brain className="w-8 h-8 text-white" />
+            </motion.div>
+            <h2 className="text-3xl font-bold text-white mb-2">
+              {currentProject ? `Generate for ${currentProject.name}` : 'AI Website Generator'}
+            </h2>
+            <p className="text-neutral-400 text-lg">
+              Describe your vision and watch Claude AI create stunning Walrus Sites
+            </p>
+          </div>
+
+          {/* Main Input Area */}
+          <motion.div
+            className="relative bg-neutral-900/60 backdrop-blur-xl rounded-3xl border border-neutral-600/50 shadow-2xl overflow-hidden"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <div className="relative">
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder={currentProject 
+                  ? `Describe updates or new features for ${currentProject.name}...`
+                  : "Describe the website you want to create... Be specific about features, design style, and functionality!"
+                }
+                className="w-full p-6 pr-20 bg-transparent text-white placeholder-neutral-400 focus:outline-none resize-none text-lg min-h-[150px] max-h-[400px]"
+                rows={6}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                    handleSubmit();
+                  }
                 }}
-                transition={{ duration: 8, repeat: Infinity }}
               />
               
-              <div className="relative z-10">
-                <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-3">
+              {/* Send Button */}
+              <motion.button
+                onClick={handleSubmit}
+                disabled={!prompt.trim() || isGenerating}
+                className={`absolute bottom-4 right-4 p-3 rounded-2xl transition-all ${
+                  prompt.trim() && !isGenerating
+                    ? 'bg-motion-500 text-white hover:bg-motion-400 shadow-lg shadow-motion-500/25'
+                    : 'bg-neutral-700 text-neutral-400'
+                }`}
+                whileHover={prompt.trim() && !isGenerating ? { scale: 1.05 } : {}}
+                whileTap={prompt.trim() && !isGenerating ? { scale: 0.95 } : {}}
+              >
+                {isGenerating ? (
                   <motion.div
-                    animate={{ rotate: [0, 15, -15, 0] }}
-                    transition={{ duration: 2, repeat: Infinity }}
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                   >
-                    <Wand2 className="w-7 h-7 text-motion-400" />
+                    <Cpu className="w-6 h-6" />
                   </motion.div>
-                  Create Something Unique
-                </h3>
-                <p className="text-quantum-300 text-lg mb-6 leading-relaxed">
-                  Don&apos;t see what you&apos;re looking for? Describe your ideal website and let Claude&apos;s creativity shine with Motion Labs precision!
-                </p>
-                <div className="flex gap-4">
-                  <motion.button
-                    onClick={() => setPrompt('')}
-                    className="px-6 py-3 rounded-xl bg-motion-500/20 text-motion-300 hover:bg-motion-500/30 transition-colors font-medium backdrop-blur-sm border border-motion-500/20"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Start Fresh
-                  </motion.button>
-                  <motion.button
-                    onClick={() => window.open('https://docs.anthropic.com/claude/docs/guide-to-anthropics-prompt-engineering-resources', '_blank')}
-                    className="px-6 py-3 rounded-xl bg-void-700/60 text-quantum-300 hover:bg-void-600/60 transition-colors font-medium backdrop-blur-sm border border-void-600/30"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Prompt Tips
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
+                ) : (
+                  <Send className="w-6 h-6" />
+                )}
+              </motion.button>
+            </div>
 
-            {/* Prompt Input Section - NOW PROPERLY PLACED */}
-            <motion.div
-              className="relative p-8 rounded-3xl bg-void-900/80 backdrop-blur-2xl border border-motion-500/30 shadow-2xl"
-              initial={{ y: 100, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 2, duration: 0.8 }}
-            >
-              <div className="relative">
-                <motion.textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Describe the website you want to create... Be specific about features, design style, and functionality!"
-                  className="w-full p-6 pr-32 rounded-2xl bg-void-800/60 backdrop-blur-xl border border-motion-500/20 text-white placeholder-quantum-400 focus:outline-none focus:border-motion-500/60 focus:bg-void-800/80 transition-all resize-none text-lg min-h-[120px] shadow-2xl"
-                  rows={4}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                      handleSubmit();
-                    }
-                  }}
-                />
-                
-                {/* Character Count */}
-                <div className="absolute bottom-3 left-6 text-sm text-quantum-500">
-                  {prompt.length} characters
-                </div>
-
-                {/* Action Buttons */}
-                <div className="absolute bottom-4 right-4 flex gap-3">
-                  {prompt && (
-                    <motion.button
-                      onClick={() => setPrompt('')}
-                      className="p-3 rounded-xl bg-void-700/60 text-quantum-400 hover:bg-void-600/60 hover:text-white transition-colors backdrop-blur-sm"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <RefreshCw className="w-5 h-5" />
-                    </motion.button>
-                  )}
-                  
-                  <motion.button
-                    onClick={handleSubmit}
-                    disabled={!prompt.trim() || isGenerating}
-                    className="px-6 py-3 rounded-xl bg-motion-500 text-white disabled:bg-void-600 disabled:text-void-400 hover:bg-motion-400 transition-colors shadow-lg shadow-motion-500/30 font-medium"
-                    whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(33, 95, 246, 0.4)' }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {isGenerating ? (
-                      <motion.div
-                        className="flex items-center gap-2"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      >
-                        <Cpu className="w-6 h-6" />
-                        <span>Generating...</span>
-                      </motion.div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Wand2 className="w-6 h-6" />
-                        <span>Generate</span>
-                      </div>
-                    )}
-                  </motion.button>
-                </div>
+            {/* Footer */}
+            <div className="px-6 pb-4 flex items-center justify-between text-sm text-neutral-500">
+              <span>{prompt.length} characters • Press ⌘+Enter to generate</span>
+              <div className="flex items-center gap-2">
+                <span>Powered by</span>
+                <span className="text-motion-400 font-medium">Claude AI</span>
               </div>
-              
-              <div className="flex items-center justify-between mt-4">
-                <div className="flex items-center gap-6">
-                  <p className="text-sm text-quantum-500">
-                    Press ⌘+Enter to generate • Powered by Claude AI
-                  </p>
-                  {favoritePrompts.length > 0 && (
-                    <span className="text-sm text-plasma-400 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4" />
-                      {favoritePrompts.length} favorites saved
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-quantum-500">
-                  <span>Deploy to</span>
-                  <Waves className="w-5 h-5 text-motion-400" />
-                  <span className="text-motion-400 font-medium">Walrus Sites</span>
-                </div>
-              </div>
-            </motion.div>
+            </div>
           </motion.div>
-        </div>
+        </motion.div>
+
+        {/* Templates Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-bold text-white">Quick Start Templates</h3>
+            <span className="text-neutral-400">{filteredPrompts.length} templates</span>
+          </div>
+
+          {/* Search and Filters */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search templates..."
+                className="w-full pl-12 pr-4 py-3 rounded-2xl bg-neutral-800/60 backdrop-blur-xl border border-neutral-600/50 text-white placeholder-neutral-400 focus:outline-none focus:border-motion-500/50 transition-all"
+              />
+              <Sparkles className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-motion-400" />
+            </div>
+            
+            <div className="flex gap-2 overflow-x-auto">
+              {Object.entries(promptCategories).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedCategory(key)}
+                  className={`px-4 py-3 rounded-2xl whitespace-nowrap font-medium transition-all ${
+                    selectedCategory === key
+                      ? 'bg-motion-500 text-white shadow-lg shadow-motion-500/25'
+                      : 'bg-neutral-800/60 text-neutral-300 hover:bg-neutral-700/60 hover:text-white'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Template Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredPrompts.map((template, index) => (
+              <motion.div
+                key={index}
+                className="group relative p-6 rounded-2xl bg-neutral-800/40 backdrop-blur-xl border border-neutral-600/50 hover:border-motion-400/50 transition-all cursor-pointer"
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setPrompt(template.prompt)}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 + index * 0.1 }}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <h4 className="font-bold text-white group-hover:text-motion-300 transition-colors text-lg">
+                    {template.title}
+                  </h4>
+                  <span className="px-3 py-1 rounded-full text-xs bg-motion-500/20 text-motion-300 border border-motion-500/30">
+                    {promptCategories[template.category as keyof typeof promptCategories]}
+                  </span>
+                </div>
+                <p className="text-neutral-400 text-sm mb-4">{template.description}</p>
+                <div className="text-xs text-neutral-500 line-clamp-2 font-mono bg-neutral-900/60 p-3 rounded-xl border border-neutral-700/50">
+                  {template.prompt}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {filteredPrompts.length === 0 && (
+            <div className="text-center py-12">
+              <Sparkles className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">No templates found</h3>
+              <p className="text-neutral-400">Try adjusting your search or category filter</p>
+            </div>
+          )}
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+// Project Management Interface
+const ProjectDetailView = ({ project, onGenerate, onDeploy, onBack, generatedSite, isGenerating, isDeploying, deployment }: {
+  project: Project;
+  onGenerate: (prompt: string) => void;
+  onDeploy: () => Promise<WalrusDeployment>;
+  onBack: () => void;
+  generatedSite?: GeneratedSite | null;
+  isGenerating?: boolean;
+  isDeploying?: boolean;
+  deployment?: WalrusDeployment | null;
+}) => {
+  const [activeTab, setActiveTab] = useState('generate');
+
+  const handleDeploy = async () => {
+    try {
+      return await onDeploy();
+    } catch (error) {
+      console.error('Deployment failed:', error);
+      throw error;
+    }
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'generate':
+        return (
+          <GenerationInterface
+            onGenerate={onGenerate}
+            isGenerating={isGenerating || false}
+            currentProject={project}
+          />
+        );
+      case 'preview':
+        return (
+          <PreviewPanel
+            site={generatedSite || null}
+            isGenerating={isGenerating || false}
+            onDeploy={handleDeploy}
+            deployment={deployment || null}
+            isDeploying={isDeploying || false}
+          />
+        );
+      case 'deploy':
+        return (
+          <div className="flex-1 overflow-y-auto p-8">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl font-bold text-white mb-6">Deploy to Walrus Sites</h2>
+              <div className="bg-neutral-800/60 rounded-2xl p-8 border border-neutral-600/50">
+                <div className="text-center">
+                  <CloudUpload className="w-16 h-16 text-motion-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-bold text-white mb-2">Ready to Deploy</h3>
+                  <p className="text-neutral-400 mb-6">Deploy your site to the decentralized web</p>
+                  <button
+                    onClick={handleDeploy}
+                    disabled={isDeploying || !generatedSite}
+                    className="px-8 py-4 rounded-2xl bg-motion-500 text-white hover:bg-motion-400 transition-colors shadow-lg shadow-motion-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isDeploying ? 'Deploying...' : 'Deploy Now'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-white mb-2">Coming Soon</h3>
+              <p className="text-neutral-400">This feature is under development</p>
+            </div>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex">
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isProjectView={true} />
+        {renderContent()}
       </div>
     </div>
   );
@@ -984,7 +847,7 @@ const HistoryView = ({ history, onRegenerate }: {
   onRegenerate: (historyItem: GenerationHistory) => void;
 }) => {
   return (
-    <div className="flex-1 p-6 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto p-8">
       <motion.div 
         className="max-w-4xl mx-auto"
         initial={{ opacity: 0, y: 20 }}
@@ -992,7 +855,7 @@ const HistoryView = ({ history, onRegenerate }: {
         transition={{ duration: 0.8 }}
       >
         <h2 className="text-3xl font-bold text-white mb-4">Generation History</h2>
-        <p className="text-void-300 mb-6">View and regenerate previous generations.</p>
+        <p className="text-neutral-400 mb-8 text-lg">View and regenerate previous generations.</p>
 
         {history.length === 0 ? (
           <motion.div 
@@ -1001,36 +864,37 @@ const HistoryView = ({ history, onRegenerate }: {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-quantum-500 to-plasma-500 flex items-center justify-center">
-              <History className="w-10 h-10 text-white" />
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-motion-500/20 border border-motion-500/30 flex items-center justify-center">
+              <History className="w-10 h-10 text-motion-400" />
             </div>
             <h3 className="text-xl font-bold text-white mb-3">No generation history yet</h3>
-            <p className="text-void-300 mb-6">Generate a site to see your history here.</p>
+            <p className="text-neutral-400 mb-6">Generate a site to see your history here.</p>
           </motion.div>
         ) : (
           <div className="space-y-4">
             {history.map((item) => (
               <motion.div
                 key={item.id}
-                className="bg-void-800/50 rounded-xl border border-void-700/50 p-4"
-                whileHover={{ scale: 1.01 }}
+                className="bg-neutral-800/60 backdrop-blur-sm rounded-2xl border border-neutral-600/50 p-6 hover:bg-neutral-700/60 hover:border-motion-500/50 transition-all"
+                whileHover={{ scale: 1.01, y: -2 }}
                 whileTap={{ scale: 0.99 }}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold text-white">{item.prompt}</h4>
-                  <span className="text-xs text-void-400">{item.timestamp.toLocaleDateString()}</span>
+                <div className="flex items-start justify-between mb-3">
+                  <h4 className="font-semibold text-white text-lg line-clamp-1 flex-1">{item.prompt}</h4>
+                  <div className="flex items-center gap-3 ml-4">
+                    <span className="text-sm text-neutral-500">{item.timestamp.toLocaleDateString()}</span>
+                    <motion.button
+                      onClick={() => onRegenerate(item)}
+                      className="p-3 rounded-xl bg-motion-500 text-white hover:bg-motion-400 transition-colors shadow-lg shadow-motion-500/25"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      title="Regenerate"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </motion.button>
+                  </div>
                 </div>
-                <p className="text-void-300 text-sm mb-3 line-clamp-2">{item.prompt}</p>
-                <div className="flex items-center justify-end text-xs text-void-400">
-                  <motion.button
-                    onClick={() => onRegenerate(item)}
-                    className="p-2 rounded-lg bg-quantum-500 text-white hover:bg-quantum-400 transition-colors"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                  </motion.button>
-                </div>
+                <p className="text-neutral-400 line-clamp-2">{item.prompt}</p>
               </motion.div>
             ))}
           </div>
@@ -1104,6 +968,20 @@ export default function FlowVCE() {
     setDeployment(null);
   };
 
+  const handleProjectSelect = (project: Project) => {
+    setCurrentProject(project);
+    setActiveTab('generate');
+    setGeneratedSite(project.generatedSite || null);
+    setDeployment(null);
+  };
+
+  const handleBackToProjects = () => {
+    setCurrentProject(null);
+    setActiveTab('projects');
+    setGeneratedSite(null);
+    setDeployment(null);
+  };
+
   const handleGenerate = async (prompt: string) => {
     if (!settings.claudeApiKey) {
       alert('Please configure your Claude API key in settings first!');
@@ -1118,7 +996,9 @@ export default function FlowVCE() {
     }
 
     setIsGenerating(true);
-    setActiveTab('preview');
+    if (currentProject) {
+      setActiveTab('preview');
+    }
     
     try {
       const claudeAPI = new ClaudeAPI(settings.claudeApiKey);
@@ -1142,7 +1022,8 @@ export default function FlowVCE() {
           name: site.metadata.title || currentProject.name,
           description: site.metadata.description || currentProject.description,
           lastModified: new Date(),
-          status: 'draft' as const
+          status: 'draft' as const,
+          generatedSite: site
         };
         setCurrentProject(updatedProject);
         setProjects(projects.map(p => p.id === currentProject.id ? updatedProject : p));
@@ -1213,17 +1094,27 @@ export default function FlowVCE() {
   };
 
   const renderMainContent = () => {
+    if (currentProject) {
+      return (
+        <ProjectDetailView
+          project={currentProject}
+          onGenerate={handleGenerate}
+          onDeploy={handleDeploy}
+          onBack={handleBackToProjects}
+          generatedSite={generatedSite}
+          isGenerating={isGenerating}
+          isDeploying={isDeploying}
+          deployment={deployment}
+        />
+      );
+    }
+
     switch (activeTab) {
       case 'projects':
         return (
           <ProjectsView
             projects={projects}
-            onProjectSelect={(project) => {
-              setCurrentProject(project);
-              setActiveTab('generate');
-              setGeneratedSite(null);
-              setDeployment(null);
-            }}
+            onProjectSelect={handleProjectSelect}
             onNewProject={handleNewProject}
           />
         );
@@ -1232,16 +1123,6 @@ export default function FlowVCE() {
           <GenerationInterface
             onGenerate={handleGenerate}
             isGenerating={isGenerating}
-          />
-        );
-      case 'preview':
-        return (
-          <PreviewPanel
-            site={generatedSite}
-            isGenerating={isGenerating}
-            onDeploy={handleDeploy}
-            deployment={deployment}
-            isDeploying={isDeploying}
           />
         );
       case 'history':
@@ -1259,7 +1140,7 @@ export default function FlowVCE() {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <h3 className="text-xl font-bold text-white mb-2">Coming Soon</h3>
-              <p className="text-void-300">This feature is under development</p>
+              <p className="text-neutral-400">This feature is under development</p>
             </div>
           </div>
         );
@@ -1267,17 +1148,19 @@ export default function FlowVCE() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-0">
+    <div className="min-h-screen bg-neutral-950 text-white">
       <MotionQuantumBackground />
       
       <div className="relative z-10 h-screen flex flex-col">
         <Header 
           onSettingsClick={() => setShowSettings(true)}
-          currentView={activeTab}
+          currentView={currentProject ? 'project' : activeTab}
+          currentProject={currentProject}
+          onBackToProjects={currentProject ? handleBackToProjects : undefined}
         />
         
         <div className="flex-1 flex overflow-hidden">
-          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+          {!currentProject && <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />}
           {renderMainContent()}
         </div>
       </div>

@@ -4,135 +4,300 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --quantum-glow: #0ea5e9;
-  --plasma-glow: #38bdf8;
-  --void-deep: #0f172a;
-}
-
+/* Production-ready smooth scrolling */
 html {
+  scroll-behavior: smooth;
   font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
 }
 
 body {
-  @apply bg-void-900 text-white;
+  @apply bg-neutral-950 text-white;
   background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-/* Custom scrollbar */
+/* Enhanced scrollbar styles for Motion Labs */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Main content scrollbar with Motion Labs branding */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-void-800/30;
+  background: rgba(23, 23, 23, 0.6);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-void-600 rounded-full;
+  background: linear-gradient(180deg, rgba(33, 95, 246, 0.6) 0%, rgba(33, 95, 246, 0.3) 100%);
+  border-radius: 4px;
+  border: 1px solid rgba(33, 95, 246, 0.2);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-void-500;
+  background: linear-gradient(180deg, rgba(33, 95, 246, 0.8) 0%, rgba(33, 95, 246, 0.5) 100%);
+  border-color: rgba(33, 95, 246, 0.4);
 }
 
-/* Glowing text effect */
-.glow-text {
-  text-shadow: 0 0 10px var(--quantum-glow), 0 0 20px var(--quantum-glow), 0 0 30px var(--quantum-glow);
+::-webkit-scrollbar-corner {
+  background: rgba(23, 23, 23, 0.6);
 }
 
-/* Quantum border effect */
-.quantum-border {
-  position: relative;
-  background: linear-gradient(90deg, transparent, #0ea5e9, transparent);
-  background-size: 200% 1px;
-  background-repeat: no-repeat;
-  background-position: -100% 0;
-  animation: quantum-flow 3s infinite;
+/* Enhanced line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  word-break: break-word;
 }
 
-@keyframes quantum-flow {
-  0% { background-position: -100% 0; }
-  50% { background-position: 100% 0; }
-  100% { background-position: -100% 0; }
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  word-break: break-word;
 }
 
-/* Glass morphism utility */
-.glass {
-  background: rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(100, 116, 139, 0.2);
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  word-break: break-word;
 }
 
-/* Noise texture overlay */
-.noise-overlay {
-  position: relative;
+/* Performance optimizations */
+* {
+  box-sizing: border-box;
 }
 
-.noise-overlay::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 1;
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 /* Smooth focus transitions */
 input:focus,
 textarea:focus,
-select:focus {
-  transition: all 0.3s ease;
+select:focus,
+button:focus {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
 }
 
-/* Custom animation for loading states */
-@keyframes pulse-glow {
+/* Enhanced glass morphism */
+.glass-morphism {
+  background: rgba(23, 23, 23, 0.4);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Motion Labs gradient animations */
+@keyframes motion-glow {
   0%, 100% {
-    opacity: 1;
-    box-shadow: 0 0 5px var(--quantum-glow);
+    box-shadow: 0 0 20px rgba(33, 95, 246, 0.3);
   }
   50% {
-    opacity: 0.7;
-    box-shadow: 0 0 20px var(--quantum-glow), 0 0 30px var(--quantum-glow);
+    box-shadow: 
+      0 0 40px rgba(33, 95, 246, 0.5),
+      0 0 60px rgba(33, 95, 246, 0.3);
   }
 }
 
-.pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+.motion-glow {
+  animation: motion-glow 3s ease-in-out infinite;
 }
 
-/* Physics-inspired hover effects */
-.hover-float {
-  transition: transform 0.3s ease;
-}
-
-.hover-float:hover {
-  transform: translateY(-2px);
-}
-
-/* Quantum particle animation */
+/* Quantum particle animations */
 @keyframes quantum-drift {
   0%, 100% { 
-    transform: translate(0, 0) rotate(0deg); 
+    transform: translate(0, 0) rotate(0deg) scale(1); 
     opacity: 0.3;
   }
   25% { 
-    transform: translate(30px, -30px) rotate(90deg); 
+    transform: translate(30px, -30px) rotate(90deg) scale(1.2); 
     opacity: 0.8;
   }
   50% { 
-    transform: translate(-20px, -60px) rotate(180deg); 
+    transform: translate(-20px, -60px) rotate(180deg) scale(0.8); 
     opacity: 0.5;
   }
   75% { 
-    transform: translate(-40px, -20px) rotate(270deg); 
+    transform: translate(-40px, -20px) rotate(270deg) scale(1.1); 
     opacity: 0.7;
   }
 }
 
 .quantum-particle {
-  animation: quantum-drift 12s ease-in-out infinite;
+  animation: quantum-drift 12s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Enhanced button animations */
+.btn-motion {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-motion::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.btn-motion:hover::before {
+  left: 100%;
+}
+
+/* Text selection styling */
+::selection {
+  background: rgba(33, 95, 246, 0.3);
+  color: white;
+}
+
+::-moz-selection {
+  background: rgba(33, 95, 246, 0.3);
+  color: white;
+}
+
+/* Loading spinner */
+@keyframes spin-glow {
+  0% {
+    transform: rotate(0deg);
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+    filter: hue-rotate(360deg);
+  }
+}
+
+.spin-glow {
+  animation: spin-glow 2s linear infinite;
+}
+
+/* Enhanced card hover effects */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.card-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(33, 95, 246, 0.2);
+}
+
+/* Responsive breakpoint helpers */
+.mobile-only {
+  @media (min-width: 768px) {
+    display: none !important;
+  }
+}
+
+.desktop-only {
+  @media (max-width: 767px) {
+    display: none !important;
+  }
+}
+
+/* Enhanced focus states for accessibility */
+.focus-ring:focus {
+  outline: 2px solid rgba(33, 95, 246, 0.6);
+  outline-offset: 2px;
+}
+
+/* Improved text contrast for better readability */
+.text-contrast-high {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Motion reduce for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .quantum-particle {
+    animation: none;
+  }
+  
+  .motion-glow {
+    animation: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --motion-500: #0066ff;
+  }
+  
+  .bg-neutral-900 {
+    background-color: #000000;
+  }
+  
+  .text-neutral-400 {
+    color: #cccccc;
+  }
+  
+  .border-neutral-700 {
+    border-color: #555555;
+  }
+}
+
+/* Enhanced backdrop blur fallback */
+@supports not (backdrop-filter: blur(20px)) {
+  .backdrop-blur-xl {
+    background-color: rgba(23, 23, 23, 0.8);
+  }
+  
+  .backdrop-blur-2xl {
+    background-color: rgba(23, 23, 23, 0.9);
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .bg-neutral-950,
+  .bg-neutral-900 {
+    background: white !important;
+    color: black !important;
+  }
 }
