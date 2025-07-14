@@ -1,33 +1,24 @@
-import './globals.css'
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Flow - Vibe Code Environment',
-  description: 'AI-powered website generator for Walrus Sites. Create stunning websites with natural language.',
-  keywords: ['AI', 'website generator', 'Walrus Sites', 'Sui blockchain', 'web development'],
-  authors: [{ name: 'Motion Labs' }],
-}
-
-export const viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  themeColor: '#0ea5e9',
-}
+  title: "Flow VCE - AI-Powered Walrus Sites",
+  description: "Create and deploy stunning Walrus Sites with AI assistance, GitHub integration, and professional project management.",
+};
 
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en" className="dark">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      </head>
-      <body className="antialiased">
+    <html lang="en">
+      <body className={inter.className}>
         {children}
       </body>
     </html>
-  )
+  );
 }

@@ -19,22 +19,9 @@ import {
   Brain,
   Cpu,
   CloudUpload,
-  Waves,
   ArrowLeft,
-  ExternalLink,
-  Code,
-  Play,
-  Trash2,
-  Edit3,
-  Share2,
-  Download,
-  Globe,
-  Zap,
-  Monitor,
-  Tablet,
-  Smartphone,
   Send,
-  MessageSquare
+  Globe
 } from 'lucide-react';
 import PreviewPanel from './PreviewPanel';
 import { ClaudeAPI, WalrusAPI, type GeneratedSite, type WalrusDeployment, generateSiteName, validateClaudeAPIKey, validatePrivateKey } from '../lib/api';
@@ -756,11 +743,10 @@ const GenerationInterface = ({ onGenerate, isGenerating, currentProject }: {
 };
 
 // Project Management Interface
-const ProjectDetailView = ({ project, onGenerate, onDeploy, onBack, generatedSite, isGenerating, isDeploying, deployment }: {
+const ProjectDetailView = ({ project, onGenerate, onDeploy, generatedSite, isGenerating, isDeploying, deployment }: {
   project: Project;
   onGenerate: (prompt: string) => void;
   onDeploy: () => Promise<WalrusDeployment>;
-  onBack: () => void;
   generatedSite?: GeneratedSite | null;
   isGenerating?: boolean;
   isDeploying?: boolean;
@@ -1100,7 +1086,6 @@ export default function FlowVCE() {
           project={currentProject}
           onGenerate={handleGenerate}
           onDeploy={handleDeploy}
-          onBack={handleBackToProjects}
           generatedSite={generatedSite}
           isGenerating={isGenerating}
           isDeploying={isDeploying}
