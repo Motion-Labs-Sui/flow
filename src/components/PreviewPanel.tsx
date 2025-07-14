@@ -10,14 +10,12 @@ import {
   Code, 
   Download, 
   Share, 
-  RefreshCw,
   ExternalLink,
   CloudUpload,
   Check,
   Copy,
   Loader2,
-  Sparkles,
-  Globe
+  Sparkles
 } from 'lucide-react';
 import type { GeneratedSite, WalrusDeployment } from '../lib/api';
 
@@ -25,7 +23,7 @@ interface PreviewPanelProps {
   site: GeneratedSite | null;
   isGenerating: boolean;
   onDeploy: () => Promise<WalrusDeployment>;
-  deployment?: WalrusDeployment;
+  deployment?: WalrusDeployment | null;
   isDeploying?: boolean;
 }
 

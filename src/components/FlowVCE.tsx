@@ -3,41 +3,26 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Code2, 
-  Zap, 
-  Waves, 
   Sparkles, 
-  Terminal, 
   Settings,
   FileCode,
   Eye,
-  Send,
   Atom,
   Plus,
-  Save,
-  Download,
-  Upload,
-  Globe,
   Wallet,
   Key,
   Palette,
-  Monitor,
-  Smartphone,
-  Tablet,
   RefreshCw,
-  Copy,
-  ExternalLink,
   FolderPlus,
   History,
-  GitBranch,
-  Layers,
-  PaintBucket,
   Wand2,
   Brain,
   Cpu,
-  Database,
-  CloudUpload
+  CloudUpload,
+  Waves
 } from 'lucide-react';
+import PreviewPanel from './PreviewPanel';
+import { ClaudeAPI, WalrusAPI, type GeneratedSite, type WalrusDeployment, generateSiteName, validateClaudeAPIKey, validatePrivateKey } from '../lib/api';
 
 // Types
 interface Project {
@@ -595,6 +580,68 @@ const GenerationInterface = ({ onGenerate, isGenerating }: {
   );
 };
 
+// History View
+const HistoryView = ({ history, onRegenerate }: {
+  history: GenerationHistory[];
+  onRegenerate: (historyItem: GenerationHistory) => void;
+}) => {
+  return (
+    <div className="flex-1 p-6 overflow-y-auto">
+      <motion.div 
+        className="max-w-4xl mx-auto"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
+        <h2 className="text-3xl font-bold text-white mb-4">Generation History</h2>
+        <p className="text-void-300 mb-6">View and regenerate previous generations.</p>
+
+        {history.length === 0 ? (
+          <motion.div 
+            className="text-center py-20"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-quantum-500 to-plasma-500 flex items-center justify-center">
+              <History className="w-10 h-10 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-3">No generation history yet</h3>
+            <p className="text-void-300 mb-6">Generate a site to see your history here.</p>
+          </motion.div>
+        ) : (
+          <div className="space-y-4">
+            {history.map((item) => (
+              <motion.div
+                key={item.id}
+                className="bg-void-800/50 rounded-xl border border-void-700/50 p-4"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-semibold text-white">{item.prompt}</h4>
+                  <span className="text-xs text-void-400">{item.timestamp.toLocaleDateString()}</span>
+                </div>
+                <p className="text-void-300 text-sm mb-3 line-clamp-2">{item.prompt}</p>
+                <div className="flex items-center justify-end text-xs text-void-400">
+                  <motion.button
+                    onClick={() => onRegenerate(item)}
+                    className="p-2 rounded-lg bg-quantum-500 text-white hover:bg-quantum-400 transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </motion.button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+};
+
 // Main App component
 export default function FlowVCE() {
   const [activeTab, setActiveTab] = useState('projects');
@@ -602,6 +649,10 @@ export default function FlowVCE() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isDeploying, setIsDeploying] = useState(false);
+  const [generatedSite, setGeneratedSite] = useState<GeneratedSite | null>(null);
+  const [deployment, setDeployment] = useState<WalrusDeployment | null>(null);
+  const [generationHistory, setGenerationHistory] = useState<GenerationHistory[]>([]);
   const [settings, setSettings] = useState<AppSettings>({
     claudeApiKey: '',
     walrusCredentials: {
@@ -612,6 +663,33 @@ export default function FlowVCE() {
     autoSave: true,
     previewMode: 'desktop'
   });
+
+  // Save settings to localStorage
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('flow-settings');
+    if (savedSettings) {
+      setSettings(JSON.parse(savedSettings));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('flow-settings', JSON.stringify(settings));
+  }, [settings]);
+
+  // Save projects to localStorage
+  useEffect(() => {
+    localStorage.setItem('flow-projects', JSON.stringify(projects));
+  }, [projects]);
+
+  useEffect(() => {
+    const savedProjects = localStorage.getItem('flow-projects');
+    if (savedProjects) {
+      setProjects(JSON.parse(savedProjects).map((p: Project) => ({
+        ...p,
+        lastModified: new Date(p.lastModified)
+      })));
+    }
+  }, []);
 
   const handleNewProject = () => {
     const newProject: Project = {
@@ -624,15 +702,116 @@ export default function FlowVCE() {
     setProjects([newProject, ...projects]);
     setCurrentProject(newProject);
     setActiveTab('generate');
+    setGeneratedSite(null);
+    setDeployment(null);
   };
 
   const handleGenerate = async (prompt: string) => {
+    if (!settings.claudeApiKey) {
+      alert('Please configure your Claude API key in settings first!');
+      setShowSettings(true);
+      return;
+    }
+
+    if (!validateClaudeAPIKey(settings.claudeApiKey)) {
+      alert('Invalid Claude API key format. Please check your settings.');
+      setShowSettings(true);
+      return;
+    }
+
     setIsGenerating(true);
-    // TODO: Implement Claude API integration
-    setTimeout(() => {
+    setActiveTab('preview');
+    
+    try {
+      const claudeAPI = new ClaudeAPI(settings.claudeApiKey);
+      const site = await claudeAPI.generateWebsite(prompt);
+      
+      setGeneratedSite(site);
+      
+      // Add to generation history
+      const historyEntry: GenerationHistory = {
+        id: Date.now().toString(),
+        prompt,
+        timestamp: new Date(),
+        projectId: currentProject?.id
+      };
+      setGenerationHistory([historyEntry, ...generationHistory]);
+      
+      // Update current project
+      if (currentProject) {
+        const updatedProject = {
+          ...currentProject,
+          name: site.metadata.title || currentProject.name,
+          description: site.metadata.description || currentProject.description,
+          lastModified: new Date(),
+          status: 'draft' as const
+        };
+        setCurrentProject(updatedProject);
+        setProjects(projects.map(p => p.id === currentProject.id ? updatedProject : p));
+      }
+      
+    } catch (error) {
+      console.error('Generation failed:', error);
+      alert('Failed to generate website. Please check your API key and try again.');
+    } finally {
       setIsGenerating(false);
-      setActiveTab('preview');
-    }, 3000);
+    }
+  };
+
+  const handleDeploy = async (): Promise<WalrusDeployment> => {
+    if (!generatedSite) {
+      throw new Error('No site to deploy');
+    }
+
+    if (!settings.walrusCredentials.privateKey) {
+      alert('Please configure your Walrus credentials in settings first!');
+      setShowSettings(true);
+      throw new Error('Missing Walrus credentials');
+    }
+
+    if (!validatePrivateKey(settings.walrusCredentials.privateKey)) {
+      alert('Invalid private key format. Please check your settings.');
+      setShowSettings(true);
+      throw new Error('Invalid private key');
+    }
+
+    setIsDeploying(true);
+    
+    try {
+      const walrusAPI = new WalrusAPI(
+        settings.walrusCredentials.privateKey,
+        settings.walrusCredentials.network
+      );
+      
+      const siteName = currentProject?.name ? 
+        generateSiteName(currentProject.name) : 
+        generateSiteName(generatedSite.metadata.title);
+      
+      const deploymentResult = await walrusAPI.deployWebsite(generatedSite, siteName);
+      
+      setDeployment(deploymentResult);
+      
+      // Update project with deployment info
+      if (currentProject) {
+        const updatedProject = {
+          ...currentProject,
+          walrusObjectId: deploymentResult.objectId,
+          suinsName: siteName,
+          status: 'published' as const,
+          lastModified: new Date()
+        };
+        setCurrentProject(updatedProject);
+        setProjects(projects.map(p => p.id === currentProject.id ? updatedProject : p));
+      }
+      
+      return deploymentResult;
+    } catch (error) {
+      console.error('Deployment failed:', error);
+      alert('Failed to deploy to Walrus Sites. Please try again.');
+      throw error;
+    } finally {
+      setIsDeploying(false);
+    }
   };
 
   const renderMainContent = () => {
@@ -644,6 +823,8 @@ export default function FlowVCE() {
             onProjectSelect={(project) => {
               setCurrentProject(project);
               setActiveTab('generate');
+              setGeneratedSite(null);
+              setDeployment(null);
             }}
             onNewProject={handleNewProject}
           />
@@ -653,6 +834,26 @@ export default function FlowVCE() {
           <GenerationInterface
             onGenerate={handleGenerate}
             isGenerating={isGenerating}
+          />
+        );
+      case 'preview':
+        return (
+          <PreviewPanel
+            site={generatedSite}
+            isGenerating={isGenerating}
+            onDeploy={handleDeploy}
+            deployment={deployment}
+            isDeploying={isDeploying}
+          />
+        );
+      case 'history':
+        return (
+          <HistoryView
+            history={generationHistory}
+            onRegenerate={(historyItem) => {
+              setActiveTab('generate');
+              handleGenerate(historyItem.prompt);
+            }}
           />
         );
       default:

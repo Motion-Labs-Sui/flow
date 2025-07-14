@@ -164,9 +164,6 @@ export class WalrusAPI {
   }
 
   async deployWebsite(site: GeneratedSite, siteName: string): Promise<WalrusDeployment> {
-    // Create the site bundle
-    const siteBundle = this.createSiteBundle(site);
-    
     // This would integrate with the actual Walrus CLI or SDK
     // For now, we'll simulate the deployment process
     try {
@@ -195,13 +192,9 @@ export class WalrusAPI {
 
   private createSiteBundle(site: GeneratedSite): Blob {
     // Create a complete website bundle
-    const indexHtml = site.html;
-    const stylesCSS = site.css;
-    const scriptJS = site.js;
-    
     // In a real implementation, this would create a proper bundle
     // with all assets organized correctly
-    const bundle = new Blob([indexHtml], { type: 'text/html' });
+    const bundle = new Blob([site.html], { type: 'text/html' });
     return bundle;
   }
 
