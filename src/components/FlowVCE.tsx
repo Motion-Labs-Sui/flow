@@ -21,12 +21,37 @@ import {
   CloudUpload,
   ArrowLeft,
   Send,
-  Globe
+  Globe,
+  Edit3,
+  Trash2,
+  Copy,
+  Archive,
+  Users,
+  Calendar,
+  ExternalLink,
+  MoreHorizontal,
+  Search,
+  FileText,
+  Folder,
+  Save,
+  X
 } from 'lucide-react';
 import PreviewPanel from './PreviewPanel';
 import { ClaudeAPI, WalrusAPI, type GeneratedSite, type WalrusDeployment, generateSiteName, validateClaudeAPIKey, validatePrivateKey } from '../lib/api';
 
-// Types
+// Enhanced Types
+interface SourceFile {
+  id: string;
+  path: string;
+  content: string;
+  language: string;
+  size: number;
+  lastModified: Date;
+  modifiedBy: string;
+  isGenerated: boolean;
+  isEditable: boolean;
+}
+
 interface Project {
   id: string;
   name: string;
@@ -37,6 +62,9 @@ interface Project {
   thumbnail?: string;
   status: 'draft' | 'published' | 'deploying';
   generatedSite?: GeneratedSite;
+  sourceFiles: SourceFile[];
+  category?: string;
+  tags: string[];
 }
 
 interface GenerationHistory {
@@ -120,6 +148,314 @@ const MotionQuantumBackground = () => {
           size="small"
         />
       ))}
+    </div>
+  );
+};
+
+// Project Editor Modal
+const ProjectEditorModal = ({ 
+  isOpen, 
+  onClose, 
+  project, 
+  onSave 
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  project: Project | null;
+  onSave: (projectData: Partial<Project>) => void;
+}) => {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
+
+  useEffect(() => {
+    if (project) {
+      setName(project.name);
+      setDescription(project.description);
+      setCategory(project.category || '');
+    } else {
+      setName('');
+      setDescription('');
+      setCategory('');
+    }
+  }, [project]);
+
+  const handleSave = () => {
+    onSave({
+      name: name.trim(),
+      description: description.trim(),
+      category: category.trim(),
+    });
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xl"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div
+        className="w-full max-w-md bg-neutral-900/95 backdrop-blur-2xl rounded-3xl border border-neutral-700/50 shadow-2xl"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+      >
+        <div className="p-6 border-b border-neutral-700/50">
+          <h2 className="text-2xl font-bold text-white">
+            {project ? 'Edit Project' : 'Create New Project'}
+          </h2>
+        </div>
+        
+        <div className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              Project Name
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full p-3 rounded-2xl bg-neutral-800/60 backdrop-blur-xl border border-neutral-600/50 text-white placeholder-neutral-400 focus:border-motion-500/50 focus:outline-none transition-all"
+              placeholder="My Awesome Website"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              Description
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="w-full p-3 rounded-2xl bg-neutral-800/60 backdrop-blur-xl border border-neutral-600/50 text-white placeholder-neutral-400 focus:border-motion-500/50 focus:outline-none transition-all resize-none"
+              placeholder="A beautiful website built with AI"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              Category
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full p-3 rounded-2xl bg-neutral-800/60 backdrop-blur-xl border border-neutral-600/50 text-white focus:border-motion-500/50 focus:outline-none transition-all"
+            >
+              <option value="">Select Category</option>
+              <option value="portfolio">Portfolio</option>
+              <option value="business">Business</option>
+              <option value="blog">Blog</option>
+              <option value="ecommerce">E-commerce</option>
+              <option value="landing">Landing Page</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="p-6 border-t border-neutral-700/50 flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2 rounded-2xl bg-neutral-800/60 border border-neutral-600/50 text-neutral-300 hover:bg-neutral-700/60 hover:text-white transition-all"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!name.trim()}
+            className="flex-1 px-4 py-2 rounded-2xl bg-motion-500 text-white hover:bg-motion-400 transition-all shadow-lg shadow-motion-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {project ? 'Save Changes' : 'Create Project'}
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// Simple Code Editor
+const SimpleCodeEditor = ({ 
+  files, 
+  onFilesChange, 
+  activeFile, 
+  onActiveFileChange 
+}: {
+  files: SourceFile[];
+  onFilesChange: (files: SourceFile[]) => void;
+  activeFile: string | null;
+  onActiveFileChange: (fileId: string | null) => void;
+}) => {
+  const [newFileName, setNewFileName] = useState('');
+  const [showNewFile, setShowNewFile] = useState(false);
+
+  const currentFile = files.find(f => f.id === activeFile);
+
+  const handleFileContentChange = (content: string) => {
+    if (!currentFile) return;
+    
+    const updatedFiles = files.map(f => 
+      f.id === currentFile.id 
+        ? { ...f, content, lastModified: new Date() }
+        : f
+    );
+    onFilesChange(updatedFiles);
+  };
+
+  const handleCreateFile = () => {
+    if (!newFileName.trim()) return;
+    
+    const newFile: SourceFile = {
+      id: Date.now().toString(),
+      path: newFileName.trim(),
+      content: '',
+      language: getLanguageFromExtension(newFileName),
+      size: 0,
+      lastModified: new Date(),
+      modifiedBy: 'user',
+      isGenerated: false,
+      isEditable: true,
+    };
+    
+    onFilesChange([...files, newFile]);
+    setNewFileName('');
+    setShowNewFile(false);
+    onActiveFileChange(newFile.id);
+  };
+
+  const handleDeleteFile = (fileId: string) => {
+    const updatedFiles = files.filter(f => f.id !== fileId);
+    onFilesChange(updatedFiles);
+    if (activeFile === fileId) {
+      onActiveFileChange(updatedFiles.length > 0 ? updatedFiles[0].id : null);
+    }
+  };
+
+  const getLanguageFromExtension = (filename: string): string => {
+    const ext = filename.split('.').pop()?.toLowerCase() || '';
+    const langMap: Record<string, string> = {
+      'html': 'html',
+      'css': 'css',
+      'js': 'javascript',
+      'ts': 'typescript',
+      'json': 'json',
+      'md': 'markdown',
+    };
+    return langMap[ext] || 'text';
+  };
+
+  return (
+    <div className="flex h-full bg-neutral-950">
+      {/* File Explorer */}
+      <div className="w-64 bg-neutral-900/60 backdrop-blur-xl border-r border-neutral-700/50 flex flex-col">
+        <div className="p-4 border-b border-neutral-700/50">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-white">Files</h3>
+            <button
+              onClick={() => setShowNewFile(true)}
+              className="p-1 hover:bg-neutral-700/50 rounded"
+              title="New File"
+            >
+              <Plus className="w-4 h-4 text-neutral-400" />
+            </button>
+          </div>
+          
+          {showNewFile && (
+            <div className="flex gap-2 mt-2">
+              <input
+                type="text"
+                value={newFileName}
+                onChange={(e) => setNewFileName(e.target.value)}
+                placeholder="filename.ext"
+                className="flex-1 px-2 py-1 text-sm bg-neutral-800 text-white rounded border border-neutral-600 focus:outline-none focus:border-motion-500"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCreateFile();
+                  if (e.key === 'Escape') setShowNewFile(false);
+                }}
+                autoFocus
+              />
+              <button
+                onClick={handleCreateFile}
+                className="px-2 py-1 text-xs bg-motion-500 text-white rounded hover:bg-motion-400"
+              >
+                Add
+              </button>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-2">
+          {files.map(file => (
+            <div
+              key={file.id}
+              className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer hover:bg-neutral-700/50 group ${
+                activeFile === file.id ? 'bg-motion-500/20 text-motion-300' : 'text-neutral-300'
+              }`}
+              onClick={() => onActiveFileChange(file.id)}
+            >
+              <FileText className="w-4 h-4" />
+              <span className="flex-1 text-sm">{file.path}</span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteFile(file.id);
+                }}
+                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 rounded"
+              >
+                <Trash2 className="w-3 h-3 text-red-400" />
+              </button>
+            </div>
+          ))}
+          
+          {files.length === 0 && (
+            <div className="text-center py-8">
+              <FileText className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
+              <p className="text-sm text-neutral-400">No files yet</p>
+              <button
+                onClick={() => setShowNewFile(true)}
+                className="text-xs text-motion-400 hover:text-motion-300 mt-2"
+              >
+                Create your first file
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {/* Editor */}
+      <div className="flex-1 flex flex-col">
+        {currentFile ? (
+          <>
+            <div className="h-12 bg-neutral-800/60 backdrop-blur-xl border-b border-neutral-700/50 flex items-center px-4">
+              <FileText className="w-4 h-4 text-neutral-400 mr-2" />
+              <span className="text-sm text-neutral-300">{currentFile.path}</span>
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-xs text-neutral-500">{currentFile.language}</span>
+              </div>
+            </div>
+            <div className="flex-1">
+              <textarea
+                value={currentFile.content}
+                onChange={(e) => handleFileContentChange(e.target.value)}
+                className="w-full h-full p-4 bg-neutral-900 text-white font-mono text-sm resize-none focus:outline-none"
+                placeholder="Start typing your code..."
+                style={{ fontFamily: 'JetBrains Mono, monospace' }}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <FileCode className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-white mb-2">No file selected</h3>
+              <p className="text-neutral-400">Select a file to start editing</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -270,8 +606,22 @@ const SettingsModal = ({ isOpen, onClose, settings, onSave }: {
   );
 };
 
-// Project Card Component
-const ProjectCard = ({ project, onClick }: { project: Project; onClick: () => void }) => {
+// Enhanced Project Card Component
+const ProjectCard = ({ 
+  project, 
+  onClick, 
+  onEdit, 
+  onDelete, 
+  onDuplicate 
+}: { 
+  project: Project; 
+  onClick: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onDuplicate: () => void;
+}) => {
+  const [showMenu, setShowMenu] = useState(false);
+  
   const statusColors = {
     draft: 'bg-neutral-700/50 text-neutral-300 border-neutral-600/50',
     published: 'bg-green-500/20 text-green-300 border-green-500/30',
@@ -280,13 +630,78 @@ const ProjectCard = ({ project, onClick }: { project: Project; onClick: () => vo
 
   return (
     <motion.div
-      className="bg-neutral-900/60 backdrop-blur-sm rounded-2xl border border-neutral-700/50 p-6 hover:bg-neutral-800/60 hover:border-motion-500/50 transition-all cursor-pointer group"
+      className="bg-neutral-900/60 backdrop-blur-sm rounded-2xl border border-neutral-700/50 p-6 hover:bg-neutral-800/60 hover:border-motion-500/50 transition-all cursor-pointer group relative"
       whileHover={{ scale: 1.02, y: -4 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
     >
+      {/* Project Menu */}
+      <div className="absolute top-4 right-4">
+        <div className="relative">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowMenu(!showMenu);
+            }}
+            className="p-2 rounded-lg bg-neutral-800/50 opacity-0 group-hover:opacity-100 transition-all hover:bg-neutral-700/50"
+          >
+            <MoreHorizontal className="w-4 h-4 text-neutral-400" />
+          </button>
+
+          <AnimatePresence>
+            {showMenu && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                className="absolute top-full right-0 mt-2 w-48 bg-neutral-800 border border-neutral-600 rounded-xl shadow-xl z-50"
+              >
+                <div className="p-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit();
+                      setShowMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-700 rounded-lg transition-colors"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                    Edit Project
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDuplicate();
+                      setShowMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-700 rounded-lg transition-colors"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Duplicate
+                  </button>
+                  <hr className="my-2 border-neutral-600" />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm('Are you sure you want to delete this project?')) {
+                        onDelete();
+                      }
+                      setShowMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
       <div className="flex items-start justify-between mb-4">
-        <h3 className="font-bold text-white group-hover:text-motion-300 transition-colors text-lg line-clamp-1">
+        <h3 className="font-bold text-white group-hover:text-motion-300 transition-colors text-lg line-clamp-1 pr-12">
           {project.name}
         </h3>
         <span className={`px-3 py-1 rounded-full text-xs border ${statusColors[project.status]} font-medium`}>
@@ -294,6 +709,21 @@ const ProjectCard = ({ project, onClick }: { project: Project; onClick: () => vo
         </span>
       </div>
       <p className="text-neutral-400 text-sm mb-4 line-clamp-2">{project.description}</p>
+      
+      {/* Project Stats */}
+      <div className="flex items-center gap-4 text-xs text-neutral-500 mb-4">
+        <div className="flex items-center gap-1">
+          <FileText className="w-3 h-3" />
+          <span>{project.sourceFiles.length} files</span>
+        </div>
+        {project.category && (
+          <div className="flex items-center gap-1">
+            <Folder className="w-3 h-3" />
+            <span>{project.category}</span>
+          </div>
+        )}
+      </div>
+      
       <div className="flex items-center justify-between text-xs text-neutral-500">
         <span>{project.lastModified.toLocaleDateString()}</span>
         {project.suinsName && (
@@ -431,10 +861,13 @@ const Sidebar = ({ activeTab, setActiveTab, isProjectView = false }: {
 };
 
 // Projects View
-const ProjectsView = ({ projects, onProjectSelect, onNewProject }: {
+const ProjectsView = ({ projects, onProjectSelect, onNewProject, onEditProject, onDeleteProject, onDuplicateProject }: {
   projects: Project[];
   onProjectSelect: (project: Project) => void;
   onNewProject: () => void;
+  onEditProject: (project: Project) => void;
+  onDeleteProject: (projectId: string) => void;
+  onDuplicateProject: (project: Project) => void;
 }) => {
   return (
     <div className="flex-1 overflow-y-auto">
@@ -448,7 +881,7 @@ const ProjectsView = ({ projects, onProjectSelect, onNewProject }: {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-4xl font-bold text-white mb-2">Your Projects</h2>
-              <p className="text-neutral-400 text-lg">Create and manage your Walrus Sites with AI precision</p>
+              <p className="text-neutral-400 text-lg">Create and manage your AI-powered Walrus Sites</p>
             </div>
             <motion.button
               onClick={onNewProject}
@@ -489,6 +922,9 @@ const ProjectsView = ({ projects, onProjectSelect, onNewProject }: {
                   key={project.id}
                   project={project}
                   onClick={() => onProjectSelect(project)}
+                  onEdit={() => onEditProject(project)}
+                  onDelete={() => onDeleteProject(project.id)}
+                  onDuplicate={() => onDuplicateProject(project)}
                 />
               ))}
             </div>
@@ -743,7 +1179,7 @@ const GenerationInterface = ({ onGenerate, isGenerating, currentProject }: {
 };
 
 // Project Management Interface
-const ProjectDetailView = ({ project, onGenerate, onDeploy, generatedSite, isGenerating, isDeploying, deployment }: {
+const ProjectDetailView = ({ project, onGenerate, onDeploy, generatedSite, isGenerating, isDeploying, deployment, onFilesChange }: {
   project: Project;
   onGenerate: (prompt: string) => void;
   onDeploy: () => Promise<WalrusDeployment>;
@@ -751,8 +1187,10 @@ const ProjectDetailView = ({ project, onGenerate, onDeploy, generatedSite, isGen
   isGenerating?: boolean;
   isDeploying?: boolean;
   deployment?: WalrusDeployment | null;
+  onFilesChange: (files: SourceFile[]) => void;
 }) => {
   const [activeTab, setActiveTab] = useState('generate');
+  const [activeFile, setActiveFile] = useState<string | null>(null);
 
   const handleDeploy = async () => {
     try {
@@ -771,6 +1209,15 @@ const ProjectDetailView = ({ project, onGenerate, onDeploy, generatedSite, isGen
             onGenerate={onGenerate}
             isGenerating={isGenerating || false}
             currentProject={project}
+          />
+        );
+      case 'code':
+        return (
+          <SimpleCodeEditor
+            files={project.sourceFiles}
+            onFilesChange={onFilesChange}
+            activeFile={activeFile}
+            onActiveFileChange={setActiveFile}
           />
         );
       case 'preview':
@@ -894,6 +1341,8 @@ const HistoryView = ({ history, onRegenerate }: {
 export default function FlowVCE() {
   const [activeTab, setActiveTab] = useState('projects');
   const [showSettings, setShowSettings] = useState(false);
+  const [showProjectEditor, setShowProjectEditor] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -934,24 +1383,69 @@ export default function FlowVCE() {
     if (savedProjects) {
       setProjects(JSON.parse(savedProjects).map((p: Project) => ({
         ...p,
-        lastModified: new Date(p.lastModified)
+        lastModified: new Date(p.lastModified),
+        sourceFiles: p.sourceFiles || []
       })));
     }
   }, []);
 
   const handleNewProject = () => {
-    const newProject: Project = {
+    setEditingProject(null);
+    setShowProjectEditor(true);
+  };
+
+  const handleEditProject = (project: Project) => {
+    setEditingProject(project);
+    setShowProjectEditor(true);
+  };
+
+  const handleSaveProject = (projectData: Partial<Project>) => {
+    if (editingProject) {
+      // Edit existing project
+      const updatedProject = {
+        ...editingProject,
+        ...projectData,
+        lastModified: new Date()
+      };
+      setProjects(projects.map(p => p.id === editingProject.id ? updatedProject : p));
+      if (currentProject?.id === editingProject.id) {
+        setCurrentProject(updatedProject);
+      }
+    } else {
+      // Create new project
+      const newProject: Project = {
+        id: Date.now().toString(),
+        name: projectData.name || 'Untitled Project',
+        description: projectData.description || 'A new Walrus Site project',
+        lastModified: new Date(),
+        status: 'draft',
+        sourceFiles: [],
+        tags: [],
+        category: projectData.category,
+      };
+      setProjects([newProject, ...projects]);
+    }
+  };
+
+  const handleDeleteProject = (projectId: string) => {
+    setProjects(projects.filter(p => p.id !== projectId));
+    if (currentProject?.id === projectId) {
+      setCurrentProject(null);
+      setActiveTab('projects');
+    }
+  };
+
+  const handleDuplicateProject = (project: Project) => {
+    const duplicatedProject: Project = {
+      ...project,
       id: Date.now().toString(),
-      name: 'Untitled Project',
-      description: 'A new Walrus Site project',
+      name: `${project.name} (Copy)`,
       lastModified: new Date(),
-      status: 'draft'
+      status: 'draft',
+      walrusObjectId: undefined,
+      suinsName: undefined,
     };
-    setProjects([newProject, ...projects]);
-    setCurrentProject(newProject);
-    setActiveTab('generate');
-    setGeneratedSite(null);
-    setDeployment(null);
+    setProjects([duplicatedProject, ...projects]);
   };
 
   const handleProjectSelect = (project: Project) => {
@@ -966,6 +1460,18 @@ export default function FlowVCE() {
     setActiveTab('projects');
     setGeneratedSite(null);
     setDeployment(null);
+  };
+
+  const handleProjectFilesChange = (files: SourceFile[]) => {
+    if (!currentProject) return;
+    
+    const updatedProject = {
+      ...currentProject,
+      sourceFiles: files,
+      lastModified: new Date()
+    };
+    setCurrentProject(updatedProject);
+    setProjects(projects.map(p => p.id === currentProject.id ? updatedProject : p));
   };
 
   const handleGenerate = async (prompt: string) => {
@@ -1090,6 +1596,7 @@ export default function FlowVCE() {
           isGenerating={isGenerating}
           isDeploying={isDeploying}
           deployment={deployment}
+          onFilesChange={handleProjectFilesChange}
         />
       );
     }
@@ -1101,6 +1608,9 @@ export default function FlowVCE() {
             projects={projects}
             onProjectSelect={handleProjectSelect}
             onNewProject={handleNewProject}
+            onEditProject={handleEditProject}
+            onDeleteProject={handleDeleteProject}
+            onDuplicateProject={handleDuplicateProject}
           />
         );
       case 'generate':
@@ -1157,6 +1667,15 @@ export default function FlowVCE() {
             onClose={() => setShowSettings(false)}
             settings={settings}
             onSave={setSettings}
+          />
+        )}
+        
+        {showProjectEditor && (
+          <ProjectEditorModal
+            isOpen={showProjectEditor}
+            onClose={() => setShowProjectEditor(false)}
+            project={editingProject}
+            onSave={handleSaveProject}
           />
         )}
       </AnimatePresence>
